@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.26;
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WorldWar {
+contract WorldWar is Ownable {
 
     // winner name or idea and budget
     string public currentWinner;
@@ -10,13 +11,12 @@ contract WorldWar {
 
     // Beneficiaries
     uint8 public constant partnerPercent = 10;
-    uint256 public partnerBalance;
-    uint256 public ownerBalance;
     address public partnerAddress;
+    mapping (address => uint256) balances;
 
     event NewWinner(string newWinner, uint256 newBudget);
 
-    constructor () {
+    constructor (address initialOwner) Ownable (initialOwner) {
         currentWinner = "God";
         currentBudget = 100 wei;
         emit NewWinner(currentWinner, currentBudget);
@@ -26,17 +26,27 @@ contract WorldWar {
         require(isSufficientBudget(msg.value));
         currentBudget = msg.value;
         currentWinner = newWinner;
+        
+        // beneficiaries
+        uint256 partnerShare = msg.value * partnerPercent / 100;
+        balances[partnerAddress] += partnerShare;
+        balances[owner()] += msg.value - partnerShare; // TODO is this correct (check the way math is rounded)
         emit NewWinner(newWinner, msg.value);
-        partnerBalance += msg.value * partnerPercent / 100;
-        ownerBalance += msg.value - partnerBalance; 
     }
     function isSufficientBudget(uint256 newBudget) public view returns (bool) {
         return (newBudget >= currentBudget * winningPercent / 100);
     }
 
-    function withdrawOnwer
+    function withdraw() public {
+        require(payable(msg.sender).send(balances[msg.sender]), "Failed to send Ether");
+    }
 
-    function changePartnerAddress(address newPartnerAddress) {
+    modifier onlyPartner() {
+        require(msg.sender == partnerAddress, "Must be partner!");
+        _;
+    }
 
+    function setPartnerAddress(address payable newPartnerAddress) public onlyPartner {
+        partnerAddress = newPartnerAddress;
     }
 }

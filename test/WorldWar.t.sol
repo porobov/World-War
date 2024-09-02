@@ -7,8 +7,9 @@ import "../src/WorldWar.sol";
 contract WorldWarTest is Test {
     WorldWar public worldWar;
 
+    address payable defaultOwner = payable(0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97);
     function setUp() public {
-        worldWar = new WorldWar();
+        worldWar = new WorldWar(defaultOwner);
     }
 
     function testInitialValues() public view {
