@@ -17,13 +17,13 @@ contract WorldWarTest is Test {
     }
 
     function testIsSufficientBudget() public view {
-        uint256 budget = 200 wei;
+        uint256 budget = 110 wei;
 
         bool sufficient = worldWar.isSufficientBudget(budget);
         assertTrue(sufficient);
     }
     function testIsInsufficientBudget() public view {
-        uint256 insufficientBudget = 10 wei; // Less than 10% of 10 wei
+        uint256 insufficientBudget = 109 wei; // Less than 10% of 10 wei
 
         bool insufficient = worldWar.isSufficientBudget(insufficientBudget);
         assertFalse(insufficient);
