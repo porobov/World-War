@@ -23,7 +23,7 @@ contract WorldWar is Ownable {
     }
 
     function beat(string memory newWinner) public payable {
-        require(isSufficientBudget(msg.value));
+        require(isSufficientBudget(msg.value), "Insufficient budget");
         currentBudget = msg.value;
         currentWinner = newWinner;
         
