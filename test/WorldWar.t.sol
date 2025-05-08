@@ -6,8 +6,8 @@ import "../src/WorldWar.sol";
 
 contract WorldWarTest is Test {
     WorldWar public worldWar;
-
     address payable defaultOwner = payable(0x4838B106FCe9647Bdf1E7877BF73cE8B0BAD5f97);
+
     function setUp() public {
         worldWar = new WorldWar(defaultOwner);
     }
@@ -18,21 +18,20 @@ contract WorldWarTest is Test {
     }
 
     function testIsSufficientBudget() public view {
-        uint256 budget = 110 wei;
-
+        uint256 budget = 110 wei; // 10% more than current budget
         bool sufficient = worldWar.isSufficientBudget(budget);
         assertTrue(sufficient);
     }
-    function testIsInsufficientBudget() public view {
-        uint256 insufficientBudget = 109 wei; // Less than 10% of 10 wei
 
+    function testIsInsufficientBudget() public view {
+        uint256 insufficientBudget = 109 wei; // Less than 10% more than current budget
         bool insufficient = worldWar.isSufficientBudget(insufficientBudget);
         assertFalse(insufficient);
     }
 
     function testBeatFunctionWithSufficientBudget() public {
         string memory newWinner = "Humanity";
-        uint256 newBudget = 200 wei; // Must be at least 10% more than the current budget (1 wei)
+        uint256 newBudget = 200 wei; // More than 10% of current budget
 
         worldWar.beat{value: newBudget}(newWinner);
 
@@ -42,9 +41,9 @@ contract WorldWarTest is Test {
 
     function testBeatFunctionWithInsufficientBudget() public {
         string memory newWinner = "Aliens";
-        uint256 newBudget = 100 wei; // Not enough to beat the current budget of 1 wei
+        uint256 insufficientBudget = 109 wei; // Less than 10% more than current budget
 
-        vm.expectRevert(); // Expect the transaction to revert
-        worldWar.beat{value: newBudget}(newWinner);
+        vm.expectRevert("Insufficient budget"); // Expect specific revert message
+        worldWar.beat{value: insufficientBudget}(newWinner);
     }
 }   
