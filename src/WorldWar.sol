@@ -10,15 +10,16 @@ contract WorldWar is Ownable {
     uint8 public constant winningPercent = 110;
 
     // Beneficiaries
-    uint8 public constant partnerPercent = 10;
+    uint8 public constant partnerPercent = 1;
     address public partnerAddress;
     mapping (address => uint256) balances;
 
     event NewWinner(string newWinner, uint256 newBudget);
 
-    constructor (address initialOwner) Ownable (initialOwner) {
+    constructor (address initialOwner, address initialPartnerAddress) Ownable (initialOwner) {
         currentWinner = "God";
         currentBudget = 100 wei;
+        partnerAddress = initialPartnerAddress;
         emit NewWinner(currentWinner, currentBudget);
     }
 
@@ -30,15 +31,23 @@ contract WorldWar is Ownable {
         // beneficiaries
         uint256 partnerShare = msg.value * partnerPercent / 100;
         balances[partnerAddress] += partnerShare;
-        balances[owner()] += msg.value - partnerShare; // TODO is this correct (check the way math is rounded)
+        balances[owner()] += msg.value - partnerShare;
         emit NewWinner(newWinner, msg.value);
     }
+
     function isSufficientBudget(uint256 newBudget) public view returns (bool) {
         return (newBudget >= currentBudget * winningPercent / 100);
     }
 
     function withdraw() public {
-        require(payable(msg.sender).send(balances[msg.sender]), "Failed to send Ether");
+        uint256 amount = balances[msg.sender];
+        require(amount > 0, "No balance to withdraw");
+        balances[msg.sender] = 0;
+        require(payable(msg.sender).send(amount), "Failed to send Ether");
+    }
+
+    function getBalance(address account) public view returns (uint256) {
+        return balances[account];
     }
 
     modifier onlyPartner() {
@@ -46,7 +55,8 @@ contract WorldWar is Ownable {
         _;
     }
 
-    function setPartnerAddress(address payable newPartnerAddress) public onlyPartner {
+    function setPartnerAddress(address payable newPartnerAddress) onlyPartner public {
+        require(newPartnerAddress != address(0), "Invalid partner address");
         partnerAddress = newPartnerAddress;
     }
 }
