@@ -94,4 +94,96 @@ describe("WorldWar", function () {
       expect(await worldWar.isSufficientBudget(109)).to.be.false;
     });
   });
+
+  describe("Multiple consecutive beat calls", function () {
+    it("Should handle multiple consecutive beat calls with increasing budgets", async function () {
+      // Initial budget is 100 wei
+      let currentBudget = 100;
+      
+      // First beat - needs 110 wei (110% of 100)
+      await worldWar.connect(user1).beat("Winner 1", { value: 110 });
+      expect(await worldWar.currentWinner()).to.equal("Winner 1");
+      expect(await worldWar.currentBudget()).to.equal(110);
+      
+      // Second beat - needs 121 wei (110% of 110)
+      await worldWar.connect(user2).beat("Winner 2", { value: 121 });
+      expect(await worldWar.currentWinner()).to.equal("Winner 2");
+      expect(await worldWar.currentBudget()).to.equal(121);
+      
+      // Third beat - needs 133 wei (110% of 121, rounded down)
+      await worldWar.connect(user1).beat("Winner 3", { value: 133 });
+      expect(await worldWar.currentWinner()).to.equal("Winner 3");
+      expect(await worldWar.currentBudget()).to.equal(133);
+    });
+
+    it("Should fail if budget doesn't meet 110% requirement", async function () {
+      // Initial budget is 100 wei
+      await worldWar.connect(user1).beat("Winner 1", { value: 110 });
+      
+      // Try to beat with insufficient budget (120 instead of 121)
+      await expect(
+        worldWar.connect(user2).beat("Winner 2", { value: 120 })
+      ).to.be.revertedWith("Insufficient budget");
+    });
+  });
+
+  describe("Balance distribution", function () {
+    it("Should correctly distribute funds between owner and partner", async function () {
+      const beatAmount = 1000; // 1000 wei
+      
+      // Get initial balances
+      const ownerBalanceBefore = await worldWar.getBalance(owner.address);
+      const partnerBalanceBefore = await worldWar.getBalance(partner.address);
+      
+      // Make a beat
+      await worldWar.connect(user1).beat("New Winner", { value: beatAmount });
+      
+      // Check balances after distribution
+      const ownerBalanceAfter = await worldWar.getBalance(owner.address);
+      const partnerBalanceAfter = await worldWar.getBalance(partner.address);
+      
+      // Partner should get 1% (10 wei)
+      expect(partnerBalanceAfter - partnerBalanceBefore).to.equal(10);
+      // Owner should get 99% (990 wei)
+      expect(ownerBalanceAfter - ownerBalanceBefore).to.equal(990);
+    });
+
+    it("Should handle multiple transactions and accumulate balances correctly", async function () {
+      // First beat
+      await worldWar.connect(user1).beat("Winner 1", { value: 110 });
+      
+      // Second beat
+      await worldWar.connect(user2).beat("Winner 2", { value: 121 });
+      
+      // Check accumulated balances
+      const ownerBalance = await worldWar.getBalance(owner.address);
+      const partnerBalance = await worldWar.getBalance(partner.address);
+      
+      // Partner should have: 1% of 110 + 1% of 121 = 1.1 + 1.21 = 2.31 (rounded down to 2)
+      expect(partnerBalance).to.equal(2);
+      // Owner should have: 99% of 110 + 99% of 121 = 108.9 + 119.79 = 228.69 (rounded down to 229)
+      expect(ownerBalance).to.equal(229);
+    });
+  });
+
+  describe("Budget progression", function () {
+    it("Should require exactly 110% of current budget for each new beat", async function () {
+      let currentBudget = 100;
+      
+      // Test the progression: 100 -> 110 -> 121 -> 133 -> 146 -> 160 -> 176 -> 193 -> 212 -> 233
+      const expectedBudgets = [100, 110, 121, 133, 146, 160, 176, 193, 212, 233];
+      
+      for (let i = 0; i < expectedBudgets.length; i++) {
+        if (i === 0) {
+          // Initial state
+          expect(await worldWar.currentBudget()).to.equal(expectedBudgets[i]);
+        } else {
+          // Beat with the required amount
+          await worldWar.connect(user1).beat(`Winner ${i}`, { value: expectedBudgets[i] });
+          expect(await worldWar.currentBudget()).to.equal(expectedBudgets[i]);
+        }
+      }
+    });
+
+  });
 }); 
