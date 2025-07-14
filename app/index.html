@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World War</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="container">
+    <div class="content">
+        <div class="header-text">World War</div>
+        <div class="subheader">and the winner...</div>
+        <div class="winner">
+            <span id="currentWinner">Napoleon Bonaparte</span>
+            <input type="text" id="newName" placeholder="Enter your name" style="display: none;">
+        </div>
+        <div class="subheader">
+            (war budget
+            <span id="currentBudget">1.0</span>
+            <input type="number" id="newBudget" placeholder="Enter new budget" style="display: none;">
+            ETH)
+        </div>
+        <div class="beat-button" id="beatButton">Beat Napoleon Bonaparte</div>
+        <div class="losers">
+        </div>
+    </div>
+</div>
+<footer class="site-footer">
+    <div class="footer-left">Ownership</div>
+    <div class="footer-right">by A.C.C.E.P.T.A.N.C.E.</div>
+</footer>
+
+<div id="popup" class="popup">
+    <div class="popup-bar"></div>
+
+    <div id="closePopup" class="close-button">
+        <div class="arrow"></div>
+        <div class="arrow"></div>
+        <div class="arrow"></div>
+    </div>
+    <div class="popup-content">
+
+        <h3>World War is easy to join</h3>
+        <ol>
+            <li>Type your name or idea above.</li>
+            <li>Increase previous winner budget by at least 10%.</li>
+            <li>Connect your Ethereum wallet and pay.</li>
+        </ol>
+        <h3>World War is irrational</h3>
+        <p>Nothing in return. All money go to the creator of the World war (the artist).</p>
+        <h3>World War is unstoppable</h3>
+        <p>Runs on Ethereum blockchain. Even the creator cannot stop it.</p>
+        <div class="action-buttons">
+            <button id="connectWallet">Connect to a wallet</button>
+            <button id="payToWin">Pay to win</button>
+        </div>
+    </div>
+</div>
+<script src="js/popup.js"></script>
+</body>
+</html>

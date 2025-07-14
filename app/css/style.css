@@ -1,0 +1,238 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    padding-top: 20px;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Добавляем это свойство */
+}
+
+.header-text {
+    width: 100vw;
+    padding: 2vh 0;
+    font-size: 10vw;
+    font-weight: bold;
+    line-height: 1.2;
+    margin-bottom: 2vh;
+}
+
+.subheader {
+    margin-top: 0;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.winner {
+    font-size: 5vw;
+    font-weight: bold;
+    /*margin-bottom: 20px;*/
+}
+
+.beat-button {
+    padding: 5px 30px;
+    font-size: 1rem;
+    border: 2px solid #333;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.beat-button:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+.beat-button.inactive {
+    opacity: 0.5;
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
+
+.losers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.loser {
+    font-size: 1rem;
+    opacity: 0.5;
+    text-decoration: line-through;
+    margin-bottom: 10px;
+}
+
+.site-footer {
+    width: 100vw;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 32px;
+    font-size: 1rem;
+    opacity: 0.5;
+    z-index: 9999;
+    box-sizing: border-box;
+}
+
+.footer-left {
+    text-align: left;
+}
+
+.footer-right {
+    text-align: right;
+}
+
+.popup {
+    display: none; /* Скрываем по умолчанию */
+    position: absolute; /* Позиционируем относительно контейнера */
+    top: 100%; /* Располагаем ниже списка проигравших */
+    left: 0;
+    width: 100%;
+    background-color: transparent; /* Убираем серый фон */
+    transition: opacity 0.3s ease-in-out;
+    z-index: 100; /* Устанавливаем порядок наложения */
+}
+
+.popup-bar {
+    position: fixed; /* или absolute, если popup всегда в одном месте */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 2px;
+    background: #000;
+    z-index: 101; /* выше, чем у popup */
+}
+
+.popup-content {
+    margin: 20px auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 600px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: none; /* Убираем тень */
+    border: none; /* Убираем границу */
+    outline: none; /* Убираем обводку */
+}
+
+.popup-content input:focus,
+.popup-content button:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.popup-content ol {
+    display: inline-block;
+    text-align: left;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.popup-content ol li {
+    text-align: left;
+}
+
+.popup h3 {
+    font-weight: bold;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 15px;
+    background-color: black;
+    border-radius: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    border: none;
+}
+
+.arrow {
+    width: 0;
+    height: 0;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 4px solid white;
+    margin: 0 3px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+.action-buttons button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.hidden {
+    display: none;
+}
+
+#newName {
+    opacity: 0.6;
+    border: none;
+    outline: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: transparent;
+    width: 100%;
+    text-align: center;
+}
+
+#newBudget {
+    border: none;
+    border-bottom: 1px solid currentColor; /* Добавляем подчеркивание */
+    outline: none;
+    font-size: inherit;
+    font-family: inherit;
+    font-weight: inherit;
+    color: inherit;
+    background: transparent;
+    width: 50px; /* Adjust as needed */
+    text-align: center;
+    -moz-appearance: textfield; /* Remove spinner for Firefox */
+}
+
+#newBudget::-webkit-outer-spin-button,
+#newBudget::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+
