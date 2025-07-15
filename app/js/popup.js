@@ -1,28 +1,43 @@
-// List of famous historical figures with their budgets (ETH)
-let warList = [
-    { budget: 1.0, text: 'Napoléon Bonaparte' }, // Франция
-    { budget: 1.1, text: 'Αλέξανδρος ο Μέγας' }, // Греция (Александр Македонский)
-    { budget: 1.2, text: 'Gaius Iulius Caesar' }, // Рим (Гай Юлий Цезарь)
-    { budget: 1.3, text: 'Чингис хаан' }, // Монголия (Чингисхан)
-    { budget: 1.4, text: 'حَنِيبْعَل بن حَمِيلْقَار بَرْقَة' }, // Карфаген (Ганнибал Барка)
-    { budget: 1.5, text: 'Пётр I Великий' }, // Россия
-    { budget: 1.6, text: 'Екатерина II Великая' }, // Россия
-    { budget: 1.7, text: 'Александр Невский' }, // Россия
-    { budget: 1.8, text: 'Дмитрий Донской' }, // Россия
-    { budget: 1.9, text: 'Суворов Александр Васильевич' }, // Россия
-    { budget: 2.0, text: 'Михаил Илларионович Кутузов' }, // Россия
-    { budget: 2.1, text: 'Юрий Гагарин' }, // Россия
-    { budget: 2.2, text: '孙武 (Sun Tzu)' }, // Китай (Сунь-цзы)
-    { budget: 2.3, text: 'صلاح الدين الأيوبي‎ (Saladin)' }, // Арабский мир (Саладин)
-    { budget: 2.4, text: 'Ричард Львиное Сердце (Richard the Lionheart)' }, // Англия
-    { budget: 2.5, text: 'Карл XII Шведский (Karl XII)' }, // Швеция
-    { budget: 2.6, text: 'Владимир Всеволодович Мономах' }, // Россия
-    { budget: 2.7, text: 'Иван IV Грозный' }, // Россия
-    { budget: 2.9, text: 'Фридрих II Великий (Friedrich der Große)' } // Пруссия
-];
+// Use ethers.js from CDN (window.ethers)
 
-// Sort the list by budget in descending order
-warList.sort((a, b) => b.budget - a.budget);
+// Helper to connect to MetaMask and get provider
+async function getProvider() {
+    if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        return new window.ethers.BrowserProvider(window.ethereum);
+    } else {
+        alert('Please install MetaMask!');
+        throw new Error('MetaMask not found');
+    }
+}
+
+// Fetch ABI JSON from artifacts
+async function loadABI() {
+    const res = await fetch("../../artifacts/contracts/WorldWar.sol/WorldWar.json");
+    const json = await res.json();
+    return json.abi;
+}
+
+// Fetch contract addresses
+async function loadAddresses() {
+    const res = await fetch("../../constants/addresses.json");
+    return await res.json();
+}
+
+// Read NewWinner events from the contract
+async function fetchWarList() {
+    const abi = await loadABI();
+    const addresses = await loadAddresses();
+    const provider = await getProvider();
+    const contract = new window.ethers.Contract(addresses.WorldWar, abi, provider);
+    // Get all NewWinner events
+    const filter = await contract.filters.NewWinner();
+    const events = await contract.queryFilter(filter, 0, 'latest');
+    // Map to { budget, text }
+    return events.map(ev => ({ budget: Number(window.ethers.formatEther(ev.args.newBudget)), text: ev.args.newWinner }));
+}
+
+let warList = [];
 
 // Cache DOM elements for reuse
 const beatButton = document.getElementById('beatButton');
@@ -47,13 +62,23 @@ function enableBeatButton() {
     beatButton.style.pointerEvents = 'auto';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Fetch the war list from contract events
+    warList = await fetchWarList();
+    // Sort the list by budget in descending order
+    warList.sort((a, b) => b.budget - a.budget);
     // Populate the losers list (all except the top winner)
     for (let i = 1; i < warList.length; i++) {
         const loserElement = document.createElement('div');
         loserElement.className = 'loser';
         loserElement.textContent = `${i}. ${warList[i].text} (${warList[i].budget} ETH)`;
         losersList.appendChild(loserElement);
+    }
+    // Set the current winner and budget
+    if (warList.length > 0) {
+        currentWinner.textContent = warList[0].text;
+        currentBudget.textContent = warList[0].budget;
+        beatButton.textContent = `Beat ${warList[0].text}`;
     }
 
     // Show the popup when the beat button is clicked
@@ -167,3 +192,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// All code above is browser-compatible and works with static hosting (e.g., GitHub Pages)
