@@ -1,3 +1,4 @@
+// List of famous historical figures with their budgets (ETH)
 let warList = [
     { budget: 1.0, text: 'Napoléon Bonaparte' }, // Франция
     { budget: 1.1, text: 'Αλέξανδρος ο Μέγας' }, // Греция (Александр Македонский)
@@ -19,31 +20,35 @@ let warList = [
     { budget: 2.7, text: 'Иван IV Грозный' }, // Россия
     { budget: 2.9, text: 'Фридрих II Великий (Friedrich der Große)' } // Пруссия
 ];
+
+// Sort the list by budget in descending order
 warList.sort((a, b) => b.budget - a.budget);
 
+// Cache DOM elements for reuse
 const beatButton = document.getElementById('beatButton');
+const popup = document.getElementById('popup');
+const closePopup = document.getElementById('closePopup');
+const currentWinner = document.getElementById('currentWinner');
+const newName = document.getElementById('newName');
+const currentBudget = document.getElementById('currentBudget');
+const newBudget = document.getElementById('newBudget');
+const payToWin = document.getElementById('payToWin');
+const losersList = document.querySelector('.losers');
 
+// Disable the beat button (make it inactive and unclickable)
 function disableBeatButton() {
     beatButton.classList.add('inactive');
     beatButton.style.pointerEvents = 'none';
 }
 
+// Enable the beat button (make it active and clickable)
 function enableBeatButton() {
     beatButton.classList.remove('inactive');
     beatButton.style.pointerEvents = 'auto';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const beatButton = document.getElementById('beatButton');
-    const popup = document.getElementById('popup');
-    const closePopup = document.getElementById('closePopup');
-    const currentWinner = document.getElementById('currentWinner');
-    const newName = document.getElementById('newName');
-    const currentBudget = document.getElementById('currentBudget');
-    const newBudget = document.getElementById('newBudget');
-    const payToWin = document.getElementById('payToWin');
-    const losersList = document.querySelector('.losers');
-
+    // Populate the losers list (all except the top winner)
     for (let i = 1; i < warList.length; i++) {
         const loserElement = document.createElement('div');
         loserElement.className = 'loser';
@@ -51,23 +56,24 @@ document.addEventListener('DOMContentLoaded', function() {
         losersList.appendChild(loserElement);
     }
 
+    // Show the popup when the beat button is clicked
     beatButton.addEventListener('click', function() {
-        // Получаем первый элемент из списка проигравших
+        // Get the first loser element
         const firstLoser = document.querySelector('.loser');
 
         if (firstLoser) {
-            // Получаем положение и размеры первого проигравшего
+            // Get the position and size of the first loser
             const rect = firstLoser.getBoundingClientRect();
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-            // Позиционируем popup под первым проигравшим
+            // Position the popup below the first loser
             popup.style.position = 'absolute';
             popup.style.top = (rect.bottom + scrollTop) + 'px';
             popup.style.left = '50%';
             popup.style.transform = 'translateX(-50%)';
-            popup.style.bottom = 'auto'; // Сбрасываем bottom
+            popup.style.bottom = 'auto'; // Reset bottom
 
-            // Показываем popup
+            // Show the popup with fade-in effect
             popup.style.display = 'block';
             setTimeout(() => {
                 popup.style.opacity = '1';
@@ -81,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
             newBudget.style.display = 'inline-block';
             currentBudget.classList.add('hidden');
 
+            // Hide all losers except the first one
             document.querySelectorAll('.loser').forEach((el, idx) => {
                 if (idx === 0) {
                     el.classList.remove('hidden');
@@ -91,12 +98,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Hide the popup when the close button is clicked
     closePopup.addEventListener('click', function() {
-        // Меняем анимацию закрытия
+        // Animate popup closing
         popup.style.opacity = '0';
         setTimeout(() => {
             popup.style.display = 'none';
-        }, 500); // Время должно соответствовать времени transition в CSS
+        }, 500); // Should match CSS transition duration
 
         enableBeatButton();
         currentWinner.style.display = 'inline-block';
@@ -104,39 +112,51 @@ document.addEventListener('DOMContentLoaded', function() {
         currentBudget.classList.remove('underline', 'hidden');
         newBudget.style.display = 'none';
 
+        // Show all losers again
         const loserElements = document.querySelectorAll('.loser');
         loserElements.forEach(el => el.classList.remove('hidden'));
     });
 
+    // Scroll popup into view after a short delay (for better UX)
     setTimeout(() => {
         popup.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
 
+    // Clear the new budget input when focused
     newBudget.addEventListener('focus', function() {
-        this.value = ''; // Clear the input when focused
+        this.value = '';
     });
 
+    // Handle the pay-to-win logic
     payToWin.addEventListener('click', function() {
         const newBudgetValue = parseFloat(newBudget.value);
         const currentBudgetValue = parseFloat(currentBudget.textContent);
 
+        // Validate input: new budget must be higher and name must not be empty
         if (newBudgetValue > currentBudgetValue && newName.value.trim() !== '') {
             const oldWinner = currentWinner.textContent;
             const oldBudget = currentBudgetValue;
 
+            // Update the winner and budget
             currentWinner.textContent = newName.value;
             currentBudget.textContent = newBudgetValue;
             beatButton.textContent = `Beat ${newName.value}`;
 
+            // Add new winner to the warList and re-sort
             warList.push({ budget: newBudgetValue, text: newName.value });
             warList.sort((a, b) => b.budget - a.budget);
 
+            // Add the old winner to the top of the losers list
             const newLoser = document.createElement('div');
             newLoser.className = 'loser';
             newLoser.textContent = `${warList.length - 1}. ${oldWinner} (${oldBudget} ETH)`;
             losersList.insertBefore(newLoser, losersList.firstChild);
-            newName.value = ''; // Очистка поля ввода имени
-            newBudget.value = ''; // Очистка поля ввода бюджета
+
+            // Clear input fields
+            newName.value = '';
+            newBudget.value = '';
+
+            // Close the popup and reset UI
             closePopup.click();
             currentBudget.textContent = newBudgetValue;
             currentBudget.classList.remove('underline', 'hidden');
