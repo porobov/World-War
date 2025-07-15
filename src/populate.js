@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 const fs = require("fs");
 
-async function main() {
+async function populateWorldWar() {
   // Read contract address from file
   const addresses = JSON.parse(fs.readFileSync("constants/addresses.json"));
   const contractAddress = addresses.WorldWar;
@@ -45,7 +45,10 @@ async function main() {
   console.log("\nAll battles completed!");
 }
 
-main().catch((error) => {
+// export main function
+module.exports = { populateWorldWar };
+
+populateWorldWar().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 const fs = require("fs");
 
-async function main() {
+async function deployWorldWar() {
   // Get multiple signers for local development
   const [owner, partner, player1, player2] = await hre.ethers.getSigners();
   
@@ -29,7 +29,10 @@ async function main() {
   console.log("Deployment complete. Contract address saved to constants/addresses.json");
 }
 
-main().catch((error) => {
+// export main function
+module.exports = { deployWorldWar };
+
+deployWorldWar().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 }); 
