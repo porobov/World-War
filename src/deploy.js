@@ -26,9 +26,12 @@ async function deployWorldWar() {
     WorldWar: contractAddress
   }, null, 2));
 
-  // save contract abi to /docs/constants/abi.json
+  // save contract abi to /docs/constants/abi.json in the correct format
   const artifact = require("../artifacts/contracts/WorldWar.sol/WorldWar.json");
-  fs.writeFileSync("docs/constants/abi.json", JSON.stringify(artifact.abi, null, 2));
+  fs.writeFileSync(
+    "docs/constants/abi.json",
+    JSON.stringify({ abi: artifact.abi }, null, 2)
+  );
 
   console.log("Deployment complete. Contract address saved to docs/constants/addresses.json");
 }

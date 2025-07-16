@@ -1,3 +1,4 @@
+console.log("popup.js loaded");
 // Use ethers.js from CDN (window.ethers)
 
 // Helper to connect to MetaMask and get provider
@@ -26,15 +27,27 @@ async function loadAddresses() {
 
 // Read NewWinner events from the contract
 async function fetchWarList() {
+    console.log("fetchWarList called");
     const abi = await loadABI();
+    console.log("Loaded ABI:", abi);
     const addresses = await loadAddresses();
+    console.log("Loaded addresses:", addresses);
     const provider = await getProvider();
     const contract = new window.ethers.Contract(addresses.WorldWar, abi, provider);
-    // Get all NewWinner events
     const filter = await contract.filters.NewWinner();
     const events = await contract.queryFilter(filter, 0, 'latest');
-    // Map to { budget, text }
-    return events.map(ev => ({ budget: Number(window.ethers.formatEther(ev.args.newBudget)), text: ev.args.newWinner }));
+    console.log("Fetched events:", events); // Debug log
+
+    // Defensive mapping
+    return events
+        .filter(ev => ev.args && ev.args.newBudget !== undefined && ev.args.newWinner !== undefined)
+        .map(ev => {
+            console.log("newBudget:", ev.args.newBudget, "type:", typeof ev.args.newBudget);
+            return {
+                budget: Number(ethers.formatEther(ev.args.newBudget)),
+                text: ev.args.newWinner
+            };
+        });
 }
 
 let warList = [];
@@ -63,6 +76,8 @@ function enableBeatButton() {
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
+    console.log("Setting up DOMContentLoaded handler");
+    console.log("DOMContentLoaded fired");
     // Fetch the war list from contract events
     warList = await fetchWarList();
     // Sort the list by budget in descending order
