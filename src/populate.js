@@ -1,5 +1,6 @@
 const hre = require("hardhat");
 const fs = require("fs");
+const path = require("path");
 
 async function populateWorldWar() {
   // Read contract address from file
@@ -16,15 +17,51 @@ async function populateWorldWar() {
   const WorldWar = await hre.ethers.getContractFactory("WorldWar");
   const worldWar = WorldWar.attach(contractAddress);
 
+  // Famous winners list
+  const famousWinners = [
+    "Alexander the Great",
+    "Napoleon Bonaparte",
+    "Genghis Khan",
+    "Julius Caesar",
+    "Hannibal Barca",
+    "Saladin",
+    "Attila the Hun",
+    "William the Conqueror",
+    "Frederick the Great",
+    "Admiral Yi Sun-sin",
+    "Simón Bolívar",
+    "George Washington",
+    "Erwin Rommel",
+    "Dwight D. Eisenhower",
+    "Joan of Arc"
+  ];
+
+  // Path to store last winner index
+  const lastWinnerPath = path.join(__dirname, "../cache/last_winner.json");
+  let lastIndex = 0;
+  if (fs.existsSync(lastWinnerPath)) {
+    try {
+      const lastData = JSON.parse(fs.readFileSync(lastWinnerPath));
+      if (typeof lastData.lastIndex === "number") {
+        lastIndex = lastData.lastIndex;
+      }
+    } catch (e) {
+      // ignore and use 0
+    }
+  }
+
+  // Pick next two names, cycling if needed
+  const winner1Name = famousWinners[lastIndex % famousWinners.length];
+  const winner2Name = famousWinners[(lastIndex + 1) % famousWinners.length];
+  const winners = [
+    { name: winner1Name, signer: player1 },
+    { name: winner2Name, signer: player2 }
+  ];
+  const winnerAddresses = [];
+
   // Read current budget from deployed contract
   let currentBudget = await worldWar.currentBudget();
   console.log("Current budget:", currentBudget);
-
-  // Two winners with two different signers
-  const winner1 = { name: "Alexander the Great", signer: player1 };
-  const winner2 = { name: "Napoleon Bonaparte", signer: player2 };
-  const winners = [winner1, winner2];
-  const winnerAddresses = [];
 
   for (const winner of winners) {
     // Calculate new budget (110% of current budget as per contract)
@@ -36,10 +73,19 @@ async function populateWorldWar() {
     // Get the current winner and budget after the transaction
     const currentWinner = await worldWar.currentWinner();
     const newBudget = await worldWar.currentBudget();
-    console.log(`Successfully beat with ${winner.name}`);
-    console.log(`New current winner: ${currentWinner}`);
-    console.log(`New budget: ${newBudget} wei`);
+    console.log(`New current winner: ${currentWinner} with budget: ${newBudget} wei`);
     winnerAddresses.push(winner.signer.address);
+  }
+
+  // Save the new last index
+  const newLastIndex = (lastIndex + 2) % famousWinners.length;
+  fs.mkdirSync(path.dirname(lastWinnerPath), { recursive: true });
+  fs.writeFileSync(lastWinnerPath, JSON.stringify({ lastIndex: newLastIndex }, null, 2));
+
+  // After both battles, check if the contract's current winner is not one of the two just used
+  const contractCurrentWinner = await worldWar.currentWinner();
+  if (!winnerAddresses.includes(contractCurrentWinner)) {
+    console.log(`\nA new winner has appeared: ${contractCurrentWinner}`);
   }
 
   console.log("\nAll battles completed!");
