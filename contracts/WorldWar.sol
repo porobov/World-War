@@ -18,7 +18,7 @@ contract WorldWar is Ownable {
 
     constructor (address initialOwner, address initialPartnerAddress) Ownable (initialOwner) {
         currentWinner = "God";
-        currentBudget = 100 wei;
+        currentBudget = 0.0003 ether;
         partnerAddress = initialPartnerAddress;
         emit NewWinner(currentWinner, currentBudget);
     }
