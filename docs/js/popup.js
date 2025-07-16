@@ -13,14 +13,14 @@ async function getProvider() {
 
 // Fetch ABI JSON from artifacts
 async function loadABI() {
-    const res = await fetch("../../artifacts/contracts/WorldWar.sol/WorldWar.json");
+    const res = await fetch("constants/abi.json");
     const json = await res.json();
     return json.abi;
 }
 
 // Fetch contract addresses
 async function loadAddresses() {
-    const res = await fetch("../../constants/addresses.json");
+    const res = await fetch("constants/addresses.json");
     return await res.json();
 }
 

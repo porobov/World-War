@@ -3,10 +3,10 @@ const fs = require("fs");
 
 async function populateWorldWar() {
   // Read contract address from file
-  const addresses = JSON.parse(fs.readFileSync("constants/addresses.json"));
+  const addresses = JSON.parse(fs.readFileSync("docs/constants/addresses.json"));
   const contractAddress = addresses.WorldWar;
   if (!contractAddress) {
-    throw new Error("WorldWar contract address not found in constants/addresses.json");
+    throw new Error("WorldWar contract address not found in docs/constants/addresses.json");
   }
 
   // Get multiple signers for local development
