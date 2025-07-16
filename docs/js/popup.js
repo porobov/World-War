@@ -168,40 +168,52 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
 
     // Handle the pay-to-win logic
-    payToWin.addEventListener('click', function() {
+    payToWin.addEventListener('click', async function() {
         const newBudgetValue = parseFloat(newBudget.value);
         const currentBudgetValue = parseFloat(currentBudget.textContent);
 
         // Validate input: new budget must be higher and name must not be empty
         if (newBudgetValue > currentBudgetValue && newName.value.trim() !== '') {
-            const oldWinner = currentWinner.textContent;
-            const oldBudget = currentBudgetValue;
+            // Show loading state
+            payToWin.disabled = true;
+            payToWin.textContent = 'Processing...';
+            try {
+                const abi = await loadABI();
+                const addresses = await loadAddresses();
+                const provider = await getProvider();
+                const signer = await provider.getSigner();
+                const contract = new window.ethers.Contract(addresses.WorldWar, abi, signer);
+                // Send transaction
+                const tx = await contract.beat(newName.value, {
+                    value: window.ethers.parseEther(newBudgetValue.toString())
+                });
+                await tx.wait();
 
-            // Update the winner and budget
-            currentWinner.textContent = newName.value;
-            currentBudget.textContent = newBudgetValue;
-            beatButton.textContent = `Beat ${newName.value}`;
-
-            // Add new winner to the warList and re-sort
-            warList.push({ budget: newBudgetValue, text: newName.value });
-            warList.sort((a, b) => b.budget - a.budget);
-
-            // Add the old winner to the top of the losers list
-            const newLoser = document.createElement('div');
-            newLoser.className = 'loser';
-            newLoser.textContent = `${warList.length - 1}. ${oldWinner} (${oldBudget} ETH)`;
-            losersList.insertBefore(newLoser, losersList.firstChild);
-
-            // Clear input fields
-            newName.value = '';
-            newBudget.value = '';
-
-            // Close the popup and reset UI
-            closePopup.click();
-            currentBudget.textContent = newBudgetValue;
-            currentBudget.classList.remove('underline', 'hidden');
-            newBudget.style.display = 'none';
-            enableBeatButton();
+                // On success, update the UI
+                const oldWinner = currentWinner.textContent;
+                const oldBudget = currentBudgetValue;
+                currentWinner.textContent = newName.value;
+                currentBudget.textContent = newBudgetValue;
+                beatButton.textContent = `Beat ${newName.value}`;
+                warList.push({ budget: newBudgetValue, text: newName.value });
+                warList.sort((a, b) => b.budget - a.budget);
+                const newLoser = document.createElement('div');
+                newLoser.className = 'loser';
+                newLoser.textContent = `${warList.length - 1}. ${oldWinner} (${oldBudget} ETH)`;
+                losersList.insertBefore(newLoser, losersList.firstChild);
+                newName.value = '';
+                newBudget.value = '';
+                closePopup.click();
+                currentBudget.textContent = newBudgetValue;
+                currentBudget.classList.remove('underline', 'hidden');
+                newBudget.style.display = 'none';
+                enableBeatButton();
+            } catch (err) {
+                alert('Transaction failed: ' + (err?.message || err));
+            } finally {
+                payToWin.disabled = false;
+                payToWin.textContent = 'Pay to win';
+            }
         } else {
             alert('Please enter a valid name and a budget higher than the current one.');
         }
