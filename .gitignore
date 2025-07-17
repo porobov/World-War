@@ -16,3 +16,6 @@ artifacts
 
 # IDEs
 app/.idea/
+
+# Ignore config containing secrets
+docs/constants/config.js

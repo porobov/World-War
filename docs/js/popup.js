@@ -1,6 +1,15 @@
 console.log("popup.js loaded");
 // Use ethers.js from CDN (window.ethers)
 
+// === Alchemy config ===
+const ALCHEMY_API_KEY = window.APP_CONFIG.ALCHEMY_API_KEY; // TODO: Replace with your real key
+const ALCHEMY_NETWORK = window.APP_CONFIG.ALCHEMY_NETWORK; // e.g., 'goerli', 'sepolia', etc.
+
+// Helper to get Alchemy provider (read-only)
+function getAlchemyProvider() {
+    return new window.ethers.AlchemyProvider(ALCHEMY_NETWORK, ALCHEMY_API_KEY);
+}
+
 // Helper to connect to MetaMask and get provider
 async function getProvider() {
     if (window.ethereum) {
@@ -32,7 +41,8 @@ async function fetchWarList() {
     console.log("Loaded ABI:", abi);
     const addresses = await loadAddresses();
     console.log("Loaded addresses:", addresses);
-    const provider = await getProvider();
+    // Use Alchemy for read-only provider
+    const provider = getAlchemyProvider();
     const contract = new window.ethers.Contract(addresses.WorldWar, abi, provider);
     const filter = await contract.filters.NewWinner();
     const events = await contract.queryFilter(filter, 0, 'latest');
