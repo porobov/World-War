@@ -1,14 +1,7 @@
+import { NETWORK, PROVIDERS } from './config.js';
+
 console.log("popup.js loaded");
 // Use ethers.js from CDN (window.ethers)
-
-// === Alchemy config ===
-const ALCHEMY_API_KEY = window.APP_CONFIG.ALCHEMY_API_KEY; // TODO: Replace with your real key
-const ALCHEMY_NETWORK = window.APP_CONFIG.ALCHEMY_NETWORK; // e.g., 'goerli', 'sepolia', etc.
-
-// Helper to get Alchemy provider (read-only)
-function getAlchemyProvider() {
-    return new window.ethers.AlchemyProvider(ALCHEMY_NETWORK, ALCHEMY_API_KEY);
-}
 
 // Helper to connect to MetaMask and get provider
 async function getProvider() {
@@ -34,6 +27,12 @@ async function loadAddresses() {
     return await res.json();
 }
 
+// Helper to get contract address for current network
+function getContractAddress(addresses) {
+    // Use the same network name as NETWORK
+    return addresses[NETWORK]?.WorldWar;
+}
+
 // Read NewWinner events from the contract
 async function fetchWarList() {
     console.log("fetchWarList called");
@@ -41,9 +40,13 @@ async function fetchWarList() {
     console.log("Loaded ABI:", abi);
     const addresses = await loadAddresses();
     console.log("Loaded addresses:", addresses);
-    // Use Alchemy for read-only provider
-    const provider = getAlchemyProvider();
-    const contract = new window.ethers.Contract(addresses.WorldWar, abi, provider);
+    // Use config-based provider for read-only
+    const provider = new window.ethers.JsonRpcProvider(PROVIDERS[NETWORK]);
+    const contractAddress = getContractAddress(addresses);
+    if (!contractAddress) {
+        throw new Error(`WorldWar contract address not found for network ${NETWORK}`);
+    }
+    const contract = new window.ethers.Contract(contractAddress, abi, provider);
     const filter = await contract.filters.NewWinner();
     const events = await contract.queryFilter(filter, 0, 'latest');
     console.log("Fetched events:", events); // Debug log
@@ -192,7 +195,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const addresses = await loadAddresses();
                 const provider = await getProvider();
                 const signer = await provider.getSigner();
-                const contract = new window.ethers.Contract(addresses.WorldWar, abi, signer);
+                const contractAddress = getContractAddress(addresses);
+                if (!contractAddress) {
+                    throw new Error(`WorldWar contract address not found for network ${NETWORK}`);
+                }
+                const contract = new window.ethers.Contract(contractAddress, abi, signer);
                 // Send transaction
                 const tx = await contract.beat(newName.value, {
                     value: window.ethers.parseEther(newBudgetValue.toString())

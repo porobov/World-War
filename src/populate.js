@@ -5,9 +5,10 @@ const path = require("path");
 async function populateWorldWar() {
   // Read contract address from file
   const addresses = JSON.parse(fs.readFileSync("docs/constants/addresses.json"));
-  const contractAddress = addresses.WorldWar;
+  const networkName = hre.network.name;
+  const contractAddress = addresses[networkName]?.WorldWar;
   if (!contractAddress) {
-    throw new Error("WorldWar contract address not found in docs/constants/addresses.json");
+    throw new Error(`WorldWar contract address not found for network ${networkName} in docs/constants/addresses.json`);
   }
 
   // Get multiple signers for local development

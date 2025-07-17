@@ -21,10 +21,23 @@ async function deployWorldWar() {
   const contractAddress = await worldWar.getAddress();
   console.log("WorldWar deployed to:", contractAddress);
 
-  // save contract address to /docs/constants/addresses.json
-  fs.writeFileSync("docs/constants/addresses.json", JSON.stringify({
-    WorldWar: contractAddress
-  }, null, 2));
+  // Determine current network name
+  const networkName = hre.network.name;
+
+  // Read existing addresses.json if it exists, else start with empty object
+  let addresses = {};
+  try {
+    addresses = JSON.parse(fs.readFileSync("docs/constants/addresses.json"));
+  } catch (e) {
+    // file does not exist or is invalid, start fresh
+    addresses = {};
+  }
+
+  // Overwrite only the current network's address
+  addresses[networkName] = { WorldWar: contractAddress };
+
+  // Save updated addresses.json
+  fs.writeFileSync("docs/constants/addresses.json", JSON.stringify(addresses, null, 2));
 
   // save contract abi to /docs/constants/abi.json in the correct format
   const artifact = require("../artifacts/contracts/WorldWar.sol/WorldWar.json");
