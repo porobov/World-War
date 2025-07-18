@@ -1,7 +1,5 @@
-const fetch = require('node-fetch');
-
 // Replace <YOUR_SUBGRAPH_NAME> with your actual subgraph name
-const GRAPH_API_URL = 'https://api.thegraph.com/subgraphs/name/<YOUR_SUBGRAPH_NAME>';
+const GRAPH_API_URL = 'https://api.studio.thegraph.com/query/2388/ww-sepolia-1/version/latest';
 
 async function fetchWarlist() {
   const query = `
@@ -27,8 +25,14 @@ async function fetchWarlist() {
 }
 
 // Example usage:
-fetchWarlist().then(warlist => {
-  console.log(warlist);
-});
+if (require.main === module) {
+  fetchWarlist()
+    .then(warlist => {
+      console.log('Fetched warlist:', warlist);
+    })
+    .catch(err => {
+      console.error('Error fetching warlist:', err);
+    });
+}
 
 module.exports = { fetchWarlist }; 
