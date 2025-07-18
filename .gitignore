@@ -17,10 +17,6 @@ artifacts
 # IDEs
 app/.idea/
 
-# Ignore config containing secrets
-docs/constants/config.js
-docs/js/config.js
-
 # Subgraph
 subgraph/generated/schema.ts
 subgraph/generated/WorldWar/WorldWar.ts

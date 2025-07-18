@@ -1,4 +1,3 @@
-// Replace <YOUR_SUBGRAPH_NAME> with your actual subgraph name
 const GRAPH_API_URL = 'https://api.studio.thegraph.com/query/2388/ww-sepolia-1/version/latest';
 
 async function fetchWarlist() {
