@@ -20,3 +20,5 @@ app/.idea/
 # Ignore config containing secrets
 docs/constants/config.js
 docs/js/config.js
+subgraph/generated/schema.ts
+subgraph/generated/WorldWar/WorldWar.ts

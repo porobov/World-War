@@ -1,0 +1,7 @@
+type Winner @entity(immutable: false) {
+  id: ID!
+  newWinner: String!
+  newBudget: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+} 

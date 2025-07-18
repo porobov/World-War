@@ -1,4 +1,4 @@
-import { NETWORK, PROVIDERS } from './config.js';
+import { NETWORK, PROVIDERS, GRAPH_API_URL } from './config.js';
 
 console.log("popup.js loaded");
 // Use ethers.js from CDN (window.ethers)
@@ -33,34 +33,28 @@ function getContractAddress(addresses) {
     return addresses[NETWORK]?.WorldWar;
 }
 
-// Read NewWinner events from the contract
+// Fetch war list from The Graph subgraph
 async function fetchWarList() {
-    console.log("fetchWarList called");
-    const abi = await loadABI();
-    console.log("Loaded ABI:", abi);
-    const addresses = await loadAddresses();
-    console.log("Loaded addresses:", addresses);
-    // Use config-based provider for read-only
-    const provider = new window.ethers.JsonRpcProvider(PROVIDERS[NETWORK]);
-    const contractAddress = getContractAddress(addresses);
-    if (!contractAddress) {
-        throw new Error(`WorldWar contract address not found for network ${NETWORK}`);
-    }
-    const contract = new window.ethers.Contract(contractAddress, abi, provider);
-    const filter = await contract.filters.NewWinner();
-    const events = await contract.queryFilter(filter, 0, 'latest');
-    console.log("Fetched events:", events); // Debug log
-
-    // Defensive mapping
-    return events
-        .filter(ev => ev.args && ev.args.newBudget !== undefined && ev.args.newWinner !== undefined)
-        .map(ev => {
-            console.log("newBudget:", ev.args.newBudget, "type:", typeof ev.args.newBudget);
-            return {
-                budget: Number(ethers.formatEther(ev.args.newBudget)),
-                text: ev.args.newWinner
-            };
-        });
+    console.log("fetchWarList called (The Graph)");
+    const query = `
+      {
+        winners(orderBy: blockNumber, orderDirection: desc) {
+          newWinner
+          newBudget
+        }
+      }
+    `;
+    const response = await fetch(GRAPH_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
+    const { data } = await response.json();
+    if (!data || !data.winners) return [];
+    return data.winners.map(ev => ({
+      budget: Number(window.ethers.formatEther(ev.newBudget)),
+      text: ev.newWinner
+    }));
 }
 
 let warList = [];
