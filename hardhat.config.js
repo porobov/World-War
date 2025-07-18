@@ -1,6 +1,21 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+// Helper to load mnemonic from file
+function getMnemonic() {
+  const mnemonicPath = process.env.PATH_TO_MNEMONIC;
+  if (!mnemonicPath) return undefined;
+  try {
+    const mnemonicObj = require(mnemonicPath);
+    return mnemonicObj.mnemonic;
+  } catch (e) {
+    console.warn("Could not load mnemonic from file:", mnemonicPath, e.message);
+    return undefined;
+  }
+}
+
+const mnemonic = getMnemonic();
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: "0.8.26",
@@ -13,11 +28,11 @@ module.exports = {
     },
     sepolia: {
       url: process.env.SEPOLIA_RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      accounts: mnemonic ? { mnemonic } : [],
     },
     mainnet: {
       url: process.env.MAINNET_RPC_URL || "",
-      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      accounts: mnemonic ? { mnemonic } : [],
     }
   },
   etherscan: {
