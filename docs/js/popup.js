@@ -69,6 +69,7 @@ const currentBudget = document.getElementById('currentBudget');
 const newBudget = document.getElementById('newBudget');
 const payToWin = document.getElementById('payToWin');
 const losersList = document.querySelector('.losers');
+const connectWallet = document.getElementById('connectWallet');
 
 // Disable the beat button (make it inactive and unclickable)
 function disableBeatButton() {
@@ -228,6 +229,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         } else {
             alert('Please enter a valid name and a budget higher than the current one.');
         }
+    });
+
+    // Add alert for connectWallet button
+    connectWallet.addEventListener('click', function() {
+        alert('Supports only MetaMask desktop for now, make sure the MetaMask extension is unlocked');
     });
 });
 // All code above is browser-compatible and works with static hosting (e.g., GitHub Pages)
