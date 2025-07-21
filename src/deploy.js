@@ -3,13 +3,11 @@ const fs = require("fs");
 
 async function deployWorldWar() {
   // Get multiple signers for local development
-  const [owner, partner, player1, player2] = await hre.ethers.getSigners();
+  const [owner, partner] = await hre.ethers.getSigners();
   
   console.log("Using accounts:");
   console.log("Owner:", owner.address);
   console.log("Partner:", partner.address);
-  console.log("Player1:", player1.address);
-  console.log("Player2:", player2.address);
 
   // Get the contract factory
   const WorldWar = await hre.ethers.getContractFactory("WorldWar");
