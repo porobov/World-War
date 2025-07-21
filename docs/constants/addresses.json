@@ -4,5 +4,8 @@
   },
   "sepolia": {
     "WorldWar": "0x859Fe07D2995875319b7e65592812392B16BBADe"
+  },
+  "mainnet": {
+    "WorldWar": "0x859Fe07D2995875319b7e65592812392B16BBADe"
   }
 }
