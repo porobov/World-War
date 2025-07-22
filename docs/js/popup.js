@@ -106,6 +106,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Show the popup when the beat button is clicked
     beatButton.addEventListener('click', function() {
+        // Move current winner to the top of the losers list as the first loser
+        const winnerName = currentWinner.textContent;
+        const winnerBudget = currentBudget.textContent;
+        // Insert the current winner as the first loser
+        const newLoser = document.createElement('div');
+        newLoser.className = 'loser';
+        newLoser.textContent = `1. ${winnerName} (${winnerBudget} ETH)`;
+        losersList.insertBefore(newLoser, losersList.firstChild);
+
         // Get the first loser element
         const firstLoser = document.querySelector('.loser');
 
@@ -159,6 +168,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         newName.style.display = 'none';
         currentBudget.classList.remove('underline', 'hidden');
         newBudget.style.display = 'none';
+
+        // Remove the first loser if it matches the current winner
+        const firstLoser = losersList.querySelector('.loser');
+        if (firstLoser && firstLoser.textContent.includes(currentWinner.textContent)) {
+            firstLoser.remove();
+        }
 
         // Show all losers again
         const loserElements = document.querySelectorAll('.loser');
