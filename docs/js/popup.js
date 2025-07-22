@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Add alert for connectWallet button
     connectWallet.addEventListener('click', function() {
-        alert('Supports only MetaMask desktop for now, make sure the MetaMask extension is unlocked');
+        alert('Supports only MetaMask desktop for now, make sure the MetaMask extension is unlocked and connected to Ethereum Mainnet');
     });
 });
 // All code above is browser-compatible and works with static hosting (e.g., GitHub Pages)
