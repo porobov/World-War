@@ -210,15 +210,22 @@ document.addEventListener('DOMContentLoaded', async function() {
                     throw new Error(`WorldWar contract address not found for network ${NETWORK}`);
                 }
                 const contract = new window.ethers.Contract(contractAddress, abi, signer);
+                // Save old winner and budget before transaction
+                const oldWinner = currentWinner.textContent;
+                const oldBudget = currentBudgetValue;
                 // Send transaction
                 const tx = await contract.beat(newName.value, {
                     value: window.ethers.parseEther(newBudgetValue.toString())
                 });
                 await tx.wait();
 
+                // Remove the first loser if it matches the old winner (prevents duplicate)
+                const firstLoser = losersList.querySelector('.loser');
+                if (firstLoser && firstLoser.textContent.includes(oldWinner)) {
+                    firstLoser.remove();
+                }
+
                 // On success, update the UI
-                const oldWinner = currentWinner.textContent;
-                const oldBudget = currentBudgetValue;
                 currentWinner.textContent = newName.value;
                 currentBudget.textContent = newBudgetValue;
                 beatButton.textContent = `Beat ${newName.value}`;
